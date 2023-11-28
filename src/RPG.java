@@ -1,191 +1,200 @@
 public class RPG {
-    public static class Characters {
+    private String name;
+    private double baseHp;
+    private double hp;
+    private double maxHp;
+    private double baseMana;
+    private double mana;
+    private double maxMana;
+    private double baseAttack;
+    private double attack;
+    private double baseSpeed;
+    private double speed;
+    private double maxSpeed;
+    private int level;
+    private Sword sword;
+    private Shield shield;
+
+    public RPG(String name, int level) {
+        this(name, 100, 50, 0, 10, level);
+    }
+
+    public RPG(String name, double baseHp, double baseMana, double baseAttack, double baseSpeed, int level) {
+        this.name = name;
+        this.level = level;
+        this.baseHp = baseHp;
+        this.hp = baseHp ;
+        this.maxHp = baseHp ;
+        this.baseMana = baseMana;
+        this.mana = baseMana ;
+        this.maxMana = baseMana ;
+        this.baseAttack = baseAttack;
+        this.attack = baseAttack ;
+        this.baseSpeed = baseSpeed;
+        this.speed = baseSpeed ;
+        this.maxSpeed = baseSpeed ;
+    }
+
+    private void calculateStats() {
+        this.maxHp = baseHp + (10 * level);
+        this.hp = maxHp ;
+        this.maxMana = baseMana + (2 * level);
+        this.mana = maxMana ;
+        this.maxSpeed = baseSpeed * (0.1 + 0.03 * level);
+        this.attack = baseAttack * (1 + 0.1 * level);
+        if (sword != null) {
+            this.maxSpeed = maxSpeed - baseSpeed/2 * (0.1 + 0.04 * sword.level);
+        }
+        if (shield != null) {
+            this.maxSpeed = maxSpeed - baseSpeed/2 * (0.1 + 0.08 * shield.level);
+        }
+        this.speed = maxSpeed ;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getHp() {
+        return hp;
+    }
+
+    public double getMaxHp() {
+        return maxHp;
+    }
+
+    public double getMana() {
+        return mana;
+    }
+
+    public double getMaxMana() {
+        return maxMana;
+    }
+
+    public double getAttack() {
+        return (sword != null) ? attack + sword.getAttack() : attack;
+    }
+
+    public double getDefense() {
+        return (shield != null) ? shield.getDefense() : 0;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public Sword getSword() {
+        return sword;
+    }
+
+    public Shield getShield() {
+        return shield;
+    }
+
+    public void equipSword(Sword sword) {
+        this.sword = sword;
+        calculateStats();
+    }
+
+    public void equipShield(Shield shield) {
+        this.shield = shield;
+        calculateStats();
+    }
+
+    public void upgrade() {
+        this.level++;
+        calculateStats();
+    }
+
+    public void heal(double amount) {
+        hp += amount;
+        if (hp > maxHp) {
+            hp = maxHp;
+        }
+    }
+
+    public void restoreMana(double amount) {
+        mana += amount;
+        if (mana > maxMana) {
+            mana = maxMana;
+        }
+    }
+
+    public class Sword {
         private String name;
-        private double HP = 100;
-        private double maxHP = 100;
-        private double mana = 50;
-        private double maxMana = 50;
-        private double swordBaseDamage = 10;
-        private double shieldBaseDefense = 10;
-        private double defense = 10;
-        private double baseRunSpeed = 10;
-        private double you = 10;
-        private double swordRunSpeedDecreased = 0;
-        private double shieldRunSpeedDecreased = 0;
-        private int level = 1;
-        private boolean isHoldSwordable = false;
-        private Sword equippedSword;
-        private Shield equippedShield;
+        private double baseAttack;
+        private double attack;
+        private int level;
 
-        public Characters(String name) {
+        public Sword(String name, double baseAttack, int level) {
             this.name = name;
-            System.out.println("Hello " + name);
-        }
-
-        public void levelUp() {
-            maxHP = 100 + 10 * level;
-            maxMana = 50 + (2 * level);
-            you = baseRunSpeed * (0.1 + 0.03 * level);
-            level++;
-        }
-
-        public void equipSword(Sword sword) {
-            equippedSword = sword;
-            swordRunSpeedDecreased = baseRunSpeed * (0.1 + 0.04 * level);
-            baseRunSpeed -= swordRunSpeedDecreased;
-        }
-
-        public void equipShield(Shield shield) {
-            equippedShield = shield;
-            shieldRunSpeedDecreased = baseRunSpeed * (0.1 + 0.08 * level);
-            baseRunSpeed -= shieldRunSpeedDecreased;
-        }
-
-        public void unequipSword() {
-            equippedSword = null;
-            baseRunSpeed += swordRunSpeedDecreased;
-            swordRunSpeedDecreased = 0;
-        }
-
-        public void unequipShield() {
-            equippedShield = null;
-            baseRunSpeed += shieldRunSpeedDecreased;
-            shieldRunSpeedDecreased = 0;
-        }
-
-        public void printCharacterStats() {
-            // Display Characters stats
-            System.out.println("Characters Stats after Level Up:");
-            System.out.println("Max HP: " + maxHP);
-            System.out.println("Max Mana: " + maxMana);
-            System.out.println("Sword Damage: " + getSwordDamage());
-            System.out.println("Shield Defense: " + getShieldDefense());
-            System.out.println("Max Run Speed: " + you);
-        }
-
-        public double calculateDamage(double damage) {
-            // If there is an equipped shield, reduce damage based on shield defense
-            if (equippedShield != null) {
-                double effectiveDamage = damage - equippedShield.getBaseDefense();
-                // Ensure the effective damage is non-negative
-                return Math.max(effectiveDamage, 0);
-            } else {
-                return damage; // No shield, no reduction
-            }
-        }
-
-        private double getSwordDamage() {
-            return swordBaseDamage + (equippedSword != null ? equippedSword.getBaseDamage() : 0);
-        }
-
-        private double getShieldDefense() {
-            return shieldBaseDefense + (equippedShield != null ? equippedShield.getBaseDefense() : 0);
-        }
-    }
-
-    public static class Sword {
-        private int level;
-        private double baseDamage;
-
-        public Sword(int level, double baseDamage) {
+            this.baseAttack = baseAttack;
+            this.attack = baseAttack * (1 + 0.1 * level);
             this.level = level;
-            this.baseDamage = baseDamage;
         }
 
-        public void levelUp() {
-            baseDamage *= (1 + (0.1 * level));
+        public String getName() {
+            return name;
         }
 
-        public double getBaseDamage() {
-            return baseDamage;
+        public double getAttack() {
+            return attack;
         }
 
-        public void printSwordStats(Characters characters) {
-            if (characters.equippedSword != null) {
-                System.out.println("Sword Stats:");
-                System.out.println("Level: " + characters.equippedSword.level);
-                System.out.println("Base Damage: " + characters.equippedSword.baseDamage);
-            } else {
-                System.out.println("No sword equipped.");
-            }
+        public int getLevel() {
+            return level;
+        }
+
+        public void upgrade() {
+            this.level++;
+            calculateStats();
         }
     }
 
-    public static class Shield {
-        private int level;
+    public class Shield {
+        private String name;
         private double baseDefense;
+        private double defense;
+        private int level;
 
-        public Shield(int level, double baseDefense) {
-            this.level = level;
+        public Shield(String name, double baseDefense, int level) {
+            this.name = name;
             this.baseDefense = baseDefense;
+            this.defense = baseDefense * (1 + 0.05 * level);
+            this.level = level;
         }
 
-        public void levelUp() {
-            baseDefense *= (1 + (0.05 * level));
+        public String getName() {
+            return name;
         }
 
-        public double getBaseDefense() {
-            return baseDefense;
+        public double getDefense() {
+            return defense;
         }
 
-        public void printShieldStats(Characters characters) {
-            if (characters.equippedShield != null) {
-                System.out.println("Shield Stats:");
-                System.out.println("Level: " + characters.equippedShield.level);
-                System.out.println("Base Defense: " + characters.equippedShield.baseDefense);
-            } else {
-                System.out.println("No shield equipped.");
-            }
+        public int getLevel() {
+            return level;
+        }
+
+        public void upgrade() {
+            this.level++;
+            calculateStats();
         }
     }
-
-    public static void main(String[] args) {
-        Characters player = new Characters("Player");
-        Sword sword = new Sword(1, 5);
-        Shield shield = new Shield(1, 5);
-
-        // Initial Characters stats
-        player.printCharacterStats();
-
-        // Equip sword and shield
-        player.equipSword(sword);
-        player.equipShield(shield);
-
-        // Level up and print stats
-        player.levelUp();
-        player.printCharacterStats();
-        sword.levelUp();
-        shield.levelUp();
-        sword.printSwordStats(player);
-        shield.printShieldStats(player);
-
-        // Test damage calculation with shield
-        double incomingDamage = 15;
-        double effectiveDamage = player.calculateDamage(incomingDamage);
-        System.out.println("Effective Damage after Shield: " + effectiveDamage);
-
-        // Print HP before and after taking damage
-        System.out.println("Current HP: " + player.HP);
-        System.out.println("Taking Damage: " + incomingDamage);
-        player.HP -= effectiveDamage;
-        System.out.println("Effective HP after Damage: " + player.HP);
-
-        // Unequip shield and test damage calculation
-        player.unequipShield();
-        effectiveDamage = player.calculateDamage(incomingDamage);
-        System.out.println("Effective Damage without Shield: " + effectiveDamage);
-
-        // Print HP before and after taking damage without shield
-        System.out.println("Current HP: " + player.HP);
-        System.out.println("Taking Damage: " + incomingDamage);
-        player.HP -= effectiveDamage;
-        System.out.println("Effective HP after Damage without Shield: " + player.HP);
-
-        // Unequip sword and shield and print stats
-        player.unequipSword();
-        player.unequipShield();
-        player.printCharacterStats();
-        sword.printSwordStats(player);
-        shield.printShieldStats(player);
+    public void showStats() {
+        System.out.println("=== Current Stats ===");
+        System.out.println("Name: " + name +" (Level " + level +")");
+        System.out.println("Sword: " + (sword != null ? sword.getName() + " (Level " + sword.getLevel() + ")" : "None"));
+        System.out.println("Shield: " + (shield != null ? shield.getName() + " (Level " + shield.getLevel() + ")" : "None"));
+        System.out.println("HP: " + hp + " / " + maxHp);
+        System.out.println("Mana: " + mana + " / " + maxMana);
+        System.out.println("Attack: " + getAttack());
+        System.out.println("Defense: " + getDefense());
+        System.out.println("Speed: " + speed);
+        System.out.println("=====================");
     }
 }
